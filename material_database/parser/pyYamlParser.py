@@ -24,7 +24,7 @@ __all__ = ["PyYamlParser"]
 
 __docformat__ = "restructuredtext"
 
-# import numpy as np
+import numpy as np
 import yaml
 import bibtexparser
 from bibtexparser.bibdatabase import BibDatabase
