@@ -24,7 +24,6 @@ __all__ = ["PyYamlParser"]
 
 __docformat__ = "restructuredtext"
 
-import numpy as np
 import yaml
 import bibtexparser
 from bibtexparser.bibdatabase import BibDatabase
@@ -48,75 +47,103 @@ class PyYamlParser():
     def get_path(self):
         return self.__path
 
+# load() loads a yaml file from the given path and returns a dictionary.
     def load(self):
-        f = open(self.__path, "r")
-        yamlText = f.read()
+        # read yaml file
+        yaml_file = open(self.__path, "r")
+        yaml_Text = yaml_file.read()
 
-        meta = yamlText.split("data:")[0]
-        metaNoRef = meta.split("references:")[0]
+        # split yaml string into three strings for the three different
+        # sections meta, references and data
+        meta = yaml_Text.split("data:")[0]
+        meta_no_ref = meta.split("references:")[0]
         bibtex = meta.split("references:")[1]
-        data = "data:"+yamlText.split("data:")[1]
+        data = "data:"+yaml_Text.split("data:")[1]
 
-        bibDict = bibtexparser.loads(bibtex).entries
-        metaDict = yaml.load(metaNoRef, Loader=yaml.FullLoader)
-        dataDict = yaml.load(data, Loader=yaml.FullLoader)
+        # convert references string into bibtex dictionary
+        bib_dict = bibtexparser.loads(bibtex).entries
+        # convert meta and data string into dictionaries
+        meta_dict = yaml.load(meta_no_ref, Loader=yaml.FullLoader)
+        data_dict = yaml.load(data, Loader=yaml.FullLoader)
 
-        metaDict["meta"]["references"] = bibDict
+        # insert the bibtex dict into the meta dict
+        meta_dict["meta"]["references"] = bib_dict
 
-        dict1 = dict(metaDict, **dataDict)
+        # concat the meta and the data dict to one dict which is then returned.
+        dict1 = dict(meta_dict, **data_dict)
 
         return dict1
 
+# dump(dict) converts a dictionary into a yaml file which is returned by this function
     def dump(self, dict1):
-        bibDict = dict1["meta"]["references"]
 
-        metaDict = dict(dict1)
+        # divide the dict into three dict. BibDict contains the references,
+        # metaDict contains the meta dates and dataDict contains the data.
+        bib_dict = dict1["meta"]["references"]
+        meta_dict = dict(dict1)
+        data_dict = dict(dict1)
 
-        del metaDict["meta"]["references"]
-        del metaDict["data"]
-        yamlMeta = (yaml.dump(metaDict,
-                              allow_unicode=True,
-                              sort_keys=False)).rstrip(" ")
+        del meta_dict["meta"]["references"]
+        del meta_dict["data"]
 
-        bibObj = BibDatabase()
-        bibObj.entries = bibDict
-        bibStr = bibtexparser.dumps(bibObj)
+        del data_dict["meta"]
 
-        splitBib = bibStr.split("\n")
-        splitBib[0] = "    "+splitBib[0]
-        yamlBib = ("  references: \n" + "\n     ".join(splitBib)).rstrip("\n ")
+        # convert the meta dict to a yaml string
+        yaml_meta = (yaml.dump(meta_dict,
+                               allow_unicode=True,
+                               sort_keys=False)).rstrip(" ")
 
-        dataDict = dict(dict1)
-        del dataDict["meta"]
+        # convert the reference data into bibtex strings
+        bib_obj = BibDatabase()
+        bib_obj.entries = bib_dict
+        bib_str = bibtexparser.dumps(bib_obj)
 
-        yamlData = "data:\n"
+        # add four spaces in front of each bibtex line and
+        # insert a reference header with two spaces in front
+        split_Bib = bib_str.split("\n")
+        split_Bib[0] = "    "+split_Bib[0]
+        yaml_bib = ("  references: \n" + "\n     ".join(split_Bib)).rstrip("\n ")
 
-        for i in dataDict["data"].keys():
-            yamlData += "  " + i+":\n"
-            par = dataDict["data"][i]
-            for j in par.keys():
+        # add a data header
+        yaml_data = "data:\n"
 
-                yamlData += "    " + j+":\n"
-                value = par[j]["value"]
+        '''
+        Loop through the parameter names and reference names and add each key
+        to the yaml data string.
+        The data string has two spaces in front and the reference name four spaces.
+        The type of value determines which flow_style is used to convert the
+        value dict into a yaml string.
+        Values that are dict are converted as flow_style = None and
+        scalar values as flow_style = False
+        '''
+
+        for par_name in data_dict["data"].keys():
+            yaml_data += "  " + par_name+":\n"
+            par = data_dict["data"][par_name]
+            for ref_name in par.keys():
+
+                yaml_data += "    " + ref_name+":\n"
+                value = par[ref_name]["value"]
 
                 if(type(value) == dict):
-                    tmpYaml = yaml.dump(par[j],
-                                        default_flow_style=None,
-                                        allow_unicode=True,
-                                        sort_keys=False)
+                    tmp_yaml = yaml.dump(par[ref_name],
+                                         default_flow_style=None,
+                                         allow_unicode=True,
+                                         sort_keys=False)
                 else:
-                    tmpYaml = yaml.dump(par[j],
-                                        default_flow_style=False,
-                                        allow_unicode=True,
-                                        sort_keys=False)
+                    tmp_yaml = yaml.dump(par[ref_name],
+                                         default_flow_style=False,
+                                         allow_unicode=True,
+                                         sort_keys=False)
 
-                splitTmp = tmpYaml.split("\n")
-                splitTmp[0] = "      "+splitTmp[0]
-                yamlPar = "\n      ".join(splitTmp)
-                yamlData += yamlPar
+                # Six spaces are added in front of each value line.
+                split_tmp = tmp_yaml.split("\n")
+                split_tmp[0] = "      "+split_tmp[0]
+                yaml_par = "\n      ".join(split_tmp)
+                yaml_data += yaml_par
 
-            yamlData = yamlData.rstrip(" ")
-
-        yamlFile = yamlMeta + yamlBib + "\n" + yamlData
+            yaml_data = yaml_data.rstrip(" ")
+        # Concat the meta, references and data yaml string and return it
+        yamlFile = yaml_meta + yaml_bib + "\n" + yaml_data
 
         return yamlFile
