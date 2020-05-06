@@ -24,6 +24,7 @@ __all__ = ["PyYamlParser"]
 
 __docformat__ = "restructuredtext"
 
+# import numpy as np
 import yaml
 from os import path
 import logging
@@ -96,17 +97,19 @@ class PyYamlParser():
         del meta_dict["meta"]["references"]
         del meta_dict["data"]
 
-        del data_dict["meta"]
+        del metaDict["meta"]["references"]
+        del metaDict["data"]
+        yamlMeta = (yaml.dump(metaDict,
+                              allow_unicode=True,
+                              sort_keys=False)).rstrip(" ")
 
-        # convert the meta dict to a yaml string
-        yaml_meta = (yaml.dump(meta_dict,
-                               allow_unicode=True,
-                               sort_keys=False)).rstrip(" ")
+        bibObj = BibDatabase()
+        bibObj.entries = bibDict
+        bibStr = bibtexparser.dumps(bibObj)
 
-        # convert the reference data into bibtex strings
-        bib_obj = BibDatabase()
-        bib_obj.entries = bib_dict
-        bib_str = bibtexparser.dumps(bib_obj)
+        splitBib = bibStr.split("\n")
+        splitBib[0] = "    "+splitBib[0]
+        yamlBib = ("  references: \n" + "\n     ".join(splitBib)).rstrip("\n ")
 
         # add four spaces in front of each bibtex line and
         # insert a reference header with two spaces in front
@@ -136,10 +139,10 @@ class PyYamlParser():
                 value = par[ref_name]['value']
 
                 if(type(value) == dict):
-                    tmp_yaml = yaml.dump(par[ref_name],
-                                         default_flow_style=None,
-                                         allow_unicode=True,
-                                         sort_keys=False)
+                    tmpYaml = yaml.dump(par[j],
+                                        default_flow_style=None,
+                                        allow_unicode=True,
+                                        sort_keys=False)
                 else:
                     tmp_yaml = yaml.dump(par[ref_name],
                                          default_flow_style=False,
