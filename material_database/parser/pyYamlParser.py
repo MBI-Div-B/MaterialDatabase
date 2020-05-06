@@ -26,6 +26,7 @@ __docformat__ = "restructuredtext"
 
 import yaml
 from os import path
+import logging
 import bibtexparser
 from bibtexparser.bibdatabase import BibDatabase
 
@@ -37,11 +38,14 @@ class PyYamlParser():
 
     """
 
-    def __init__(self, base_path):
+    def __init__(self, base_path, log_level=logging.INFO):
+        self.logger = logging.getLogger(__name__)
+        self.logger.setLevel(level=log_level)
         if path.exists(base_path):
             self.base_path = base_path
+            self.logger.info('Base path of PyYamlParser set to: {:s}'.format(base_path))
         else:
-            raise Exception('Path {:s} does not exist!'.format(base_path))
+            self.logger.error('Path {:s} does not exist!'.format(base_path))
 
     def load(self, material):
         """load a yaml file
