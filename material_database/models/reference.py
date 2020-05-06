@@ -38,7 +38,7 @@ class Reference():
         self.logger = logging.getLogger(__name__)
         self.logger.setLevel(level=log_level)
         self.ID = ID
-        
+
         for key, value in data.items():
             self.__dict__[key] = value
 

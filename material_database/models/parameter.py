@@ -38,7 +38,7 @@ class Parameter():
         self.logger = logging.getLogger(__name__)
         self.logger.setLevel(level=log_level)
         self.ID = name
-        
+
         for key, value in data.items():
             self.__dict__[key] = value
 
@@ -50,7 +50,6 @@ class Parameter():
                     output += '{:s}: {:s}\n'.format(key, value)
                 elif isinstance(value, dict):
                     output += '{:s}:\n'.format(key)
-                    for  sub_key, sub_value in value.items():
+                    for sub_key, sub_value in value.items():
                         output += '\t{:s}: {:s}\n'.format(sub_key, str(sub_value))
         print(output)
-
