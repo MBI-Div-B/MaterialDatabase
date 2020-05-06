@@ -1,0 +1,56 @@
+meta:
+  name: test material
+  description: here is some text describing the material
+  comment: some comments
+  last_updated: 20200505_20:19:10
+  references:
+    '@article{curtiss2013unicorn,
+    author = "Curtiss, Michael and Becker, Iain and Bosman, Tudor and Doroshenko, Sergey and Grijincu, Lucian and Jackson, Tom and Kunnatur, Sandhya and Lassen, Soren and Pronin, Philip and Sankar, Sriram and others",
+    title = "Unicorn: A system for searching the social graph",
+    journal = "Proceedings of the VLDB Endowment",
+    volume = "6",
+    number = "11",
+    pages = "1150--1161",
+    year = "2013",
+    publisher = "VLDB Endowment",
+    doi = "10.14778/2536222.2536239"
+    }
+
+    @article{aad2015combined,
+        author = "Aad, Georges and Abbott, B and Abdallah, J and Abdinov, O and Aben, R and Abolins, M and AbouZeid, OS and Abramowicz, H and Abreu, H and Abreu, R and others",
+        title = "Combined Measurement of the Higgs Boson Mass in p p Collisions at s= 7 and 8 TeV with the ATLAS and CMS Experiments",
+        journal = "Physical review letters",
+        volume = "114",
+        number = "19",
+        pages = "191803",
+        year = "2015",
+        publisher = "APS"
+    }
+
+    @article{cheng2015generalized,
+        author = "Cheng, Xinyue and Zou, Yangyang",
+        title = "The generalized unicorn problem in Finsler geometry",
+        journal = "Differential Geometry-Dynamical Systems",
+        volume = "17",
+        pages = "38--48",
+        year = "2015"
+    }'
+data:
+  thermal_conductivity:
+    curtiss2013unicorn:
+      value: 80
+      uncertainty: 1
+      unit: J/m
+      comment: some value comment here
+    aad2015combined:
+      value: 82
+      uncertainty: 1
+      unit: J/m
+      comment: this is the same parameter but with a difernt value from another reference
+  refractive_index:
+    cheng2015generalized:
+      unit: ''
+      comment: it is a function of wavelength in nm. one needs to think also of a way how to make this clear in general
+      lambda: [1,2,3,4,5,6,7,8,9]
+      n: [10,20,30,40,50,60,70]
+      k: [10,20,30,40,50,60,70]

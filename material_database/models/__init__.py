@@ -1,1 +1,1 @@
-__all__ = ['Material', 'Parameter']
+__all__ = ['Material', 'Parameter', 'Reference']

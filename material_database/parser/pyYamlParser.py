@@ -38,14 +38,14 @@ class PyYamlParser():
 
     """
 
-    def __init__(self, base_path, log_level=logging.INFO):
+    def __init__(self, base_path, log_level=logging.WARNING):
         self.logger = logging.getLogger(__name__)
         self.logger.setLevel(level=log_level)
         if path.exists(base_path):
             self.base_path = base_path
-            self.logger.info('Base path of PyYamlParser set to: {:s}'.format(base_path))
+            self.logger.info('base path of PyYamlParser set to: {:s}'.format(base_path))
         else:
-            self.logger.error('Path {:s} does not exist!'.format(base_path))
+            self.logger.error('path {:s} does not exist!'.format(base_path))
 
     def load(self, material):
         """load a yaml file
@@ -59,6 +59,11 @@ class PyYamlParser():
         with open(full_file_name, 'r') as file:
             material_data = yaml.load(file, Loader=yaml.FullLoader)
 
+        # add filename as ID to dict
+        material_data['ID'] = material
+
+        self.logger.info('converted yaml file "{:s}" to Python dictionary'.format(
+            full_file_name))
         bibtex = material_data['meta']['references']
 
         # convert bibtex into list of dicts
@@ -68,6 +73,8 @@ class PyYamlParser():
         for bibtex_entry in bib_list:
             bib_dict[bibtex_entry['ID']] = bibtex_entry
             del bib_dict[bibtex_entry['ID']]['ID']
+        self.logger.info('found {:d} bibtex entries and converted them to Python '
+                         'dictionaries'.format(len(bib_dict)))
         # replace bibtex string with dict
         material_data['meta']['references'] = bib_dict
 
