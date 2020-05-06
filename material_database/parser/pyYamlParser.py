@@ -25,6 +25,7 @@ __all__ = ["PyYamlParser"]
 __docformat__ = "restructuredtext"
 
 import yaml
+from os import path
 import bibtexparser
 from bibtexparser.bibdatabase import BibDatabase
 
@@ -36,39 +37,37 @@ class PyYamlParser():
 
     """
 
-    def __init__(self, path):
-        self.path = path
+    def __init__(self, base_path):
+        if path.exists(base_path):
+            self.base_path = base_path
+        else:
+            raise Exception('Path {:s} does not exist!'.format(base_path))
 
-    def load(self):
+    def load(self, material):
         """load a yaml file
 
         load a yaml from the given path and return a dictionary.
 
         """
+        full_file_name = path.join(path.abspath(self.base_path),
+                                   material + '.yml')
         # read yaml file
-        yaml_file = open(self.path, 'r')
-        yaml_text = yaml_file.read()
+        with open(full_file_name, 'r') as file:
+            material_data = yaml.load(file, Loader=yaml.FullLoader)
 
-        # split yaml string into three strings for the three different
-        # sections meta, references and data
-        meta = yaml_text.split('data:')[0]
-        meta_no_ref = meta.split('references:')[0]
-        bibtex = meta.split('references:')[1]
-        data = 'data:' + yaml_text.split('data:')[1]
+        bibtex = material_data['meta']['references']
 
-        # convert references string into bibtex dictionary
-        bib_dict = bibtexparser.loads(bibtex).entries
-        # convert meta and data string into dictionaries
-        meta_dict = yaml.load(meta_no_ref, Loader=yaml.FullLoader)
-        data_dict = yaml.load(data, Loader=yaml.FullLoader)
+        # convert bibtex into list of dicts
+        bib_list = bibtexparser.loads(bibtex).entries
+        # create dicts with bibtex ID as key
+        bib_dict = {}
+        for bibtex_entry in bib_list:
+            bib_dict[bibtex_entry['ID']] = bibtex_entry
+            del bib_dict[bibtex_entry['ID']]['ID']
+        # replace bibtex string with dict
+        material_data['meta']['references'] = bib_dict
 
-        # insert the bibtex dict into the meta dict
-        meta_dict["meta"]["references"] = bib_dict
-
-        # concat the meta and the data dict to one dict which is then returned.
-        dict1 = dict(meta_dict, **data_dict)
-
-        return dict1
+        return material_data
 
     def dump(self, material_data):
         """dump dictionary to yaml file
