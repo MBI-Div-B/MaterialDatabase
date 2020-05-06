@@ -24,7 +24,9 @@ __all__ = ["Material"]
 
 __docformat__ = "restructuredtext"
 
-# import numpy as np
+import logging
+from .parameter import Parameter
+from .reference import Reference
 
 
 class Material():
@@ -45,17 +47,40 @@ class Material():
 
     """
 
-    def __init__(self, data_dict={}):
+    def __init__(self, material_data={}, log_level=logging.WARNING):
+        self.logger = logging.getLogger(__name__)
+        self.logger.setLevel(level=log_level)
+
         self.ID = -1
         self.name = ''
+        self.description = ''
+        self.comment = ''
+        self.last_updated = ''
+        self.parameters = {}
+        self.references = {}
+        if material_data:
+            self.build_from_dict(material_data)
 
-    def build_from_dict(self, data_dict):
+    def build_from_dict(self, material_data):
         """build_from_dict
 
         Some documentation here.
 
         """
-        pass
+        self.ID = material_data['ID']
+        self.name = material_data['meta']['name']
+        self.description = material_data['meta']['description']
+        self.comment = material_data['meta']['comment']
+        self.last_updated = material_data['meta']['last_updated']
+
+        # add references
+        for ref_ID, ref_data in material_data['meta']['references'].items():
+            self.references[ref_ID] = Reference(ref_ID, ref_data)
+            self.logger.info('added reference with key {:s}'.format(ref_ID))
+
+        for par_name, par_data in material_data['data'].items():
+            self.parameters[par_name] = Parameter(par_name, par_data)
+            self.logger.info('added parameter with name {:s}'.format(par_name))
 
     def dump_to_dict(self):
         """dump_to_dict
@@ -73,7 +98,7 @@ class Material():
         """
         pass
 
-    def add_parameter(self, parameter):
+    def add_parameter(self, parameter_dict):
         """add_parameter
 
         Some documentation here.
@@ -81,7 +106,7 @@ class Material():
         """
         pass
 
-    def add_reference(self, reference):
+    def add_reference(self, reference_dict):
         """add_reference
 
         Some documentation here.

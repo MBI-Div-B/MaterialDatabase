@@ -18,26 +18,26 @@
 #
 # Copyright (C) 2020 Felix Steinbach, Daniel Schick
 
-"""A :mod:`Parameter` module """
+"""A :mod:`Reference` module """
 
-__all__ = ["Parameter"]
+__all__ = ["Reference"]
 
 __docformat__ = "restructuredtext"
 
 import logging
 
 
-class Parameter():
-    """Parameter
+class Reference():
+    """Reference
 
-    Parameter holding information of pyhsical parameters
+    Reference holding information of references
 
     """
 
-    def __init__(self, name, data, log_level=logging.WARNING):
+    def __init__(self, ID, data, log_level=logging.WARNING):
         self.logger = logging.getLogger(__name__)
         self.logger.setLevel(level=log_level)
-        self.ID = name
+        self.ID = ID
 
         for key, value in data.items():
             self.__dict__[key] = value
@@ -45,11 +45,6 @@ class Parameter():
     def dump(self):
         output = ''
         for key, value in self.__dict__.items():
-            if key != 'logger':
-                if isinstance(value, str):
-                    output += '{:s}: {:s}\n'.format(key, value)
-                elif isinstance(value, dict):
-                    output += '{:s}:\n'.format(key)
-                    for sub_key, sub_value in value.items():
-                        output += '\t{:s}: {:s}\n'.format(sub_key, str(sub_value))
+            if isinstance(value, str):
+                output += '{:s}: {:s}\n'.format(key, value)
         print(output)
