@@ -25,8 +25,10 @@ __all__ = ["Material"]
 __docformat__ = "restructuredtext"
 
 import logging
+import re
 from .parameter import Parameter
 from .reference import Reference
+from ..helpers import name_to_identifer
 
 
 class Material():
@@ -49,7 +51,8 @@ class Material():
 
     def __init__(self, material_data={}, log_level=logging.WARNING):
         self.logger = logging.getLogger(__name__)
-        self.logger.setLevel(level=log_level)
+        self.log_level = log_level
+        self.logger.setLevel(level=self.log_level)
 
         self.ID = -1
         self.name = ''
@@ -75,12 +78,14 @@ class Material():
 
         # add references
         for ref_ID, ref_data in material_data['meta']['references'].items():
-            self.references[ref_ID] = Reference(ref_ID, ref_data)
-            self.logger.info('added reference with key {:s}'.format(ref_ID))
+            ID = name_to_identifer(ref_ID)
+            self.references[ID] = Reference(ID, ref_data)
+            self.logger.info('added reference with key {:s}'.format(ID))
 
         for par_name, par_data in material_data['data'].items():
-            self.parameters[par_name] = Parameter(par_name, par_data)
-            self.logger.info('added parameter with name {:s}'.format(par_name))
+            name = name_to_identifer(par_name)
+            self.__dict__[name] = Parameter(name, par_data, log_level=self.log_level)
+            self.logger.info('added parameter with name {:s}'.format(name))
 
     def dump_to_dict(self):
         """dump_to_dict

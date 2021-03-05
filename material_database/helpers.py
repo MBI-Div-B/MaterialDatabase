@@ -18,34 +18,21 @@
 #
 # Copyright (C) 2020 Felix Steinbach, Daniel Schick
 
-"""A :mod:`Reference` module """
+"""A :mod:`Helpers` module """
 
-__all__ = ["Reference"]
+__all__ = ["name_to_identifer"]
 
 __docformat__ = "restructuredtext"
 
-import logging
+# import logging
+import re
 
 
-class Reference():
-    """Reference
-
-    Reference holding information of references
-
-    """
-
-    def __init__(self, ID, data, log_level=logging.WARNING):
-        self.logger = logging.getLogger(__name__)
-        self.log_level = log_level
-        self.logger.setLevel(level=self.log_level)
-        self.ID = ID
-
-        for key, value in data.items():
-            self.__dict__[key] = value
-
-    def dump(self):
-        output = ''
-        for key, value in self.__dict__.items():
-            if isinstance(value, str):
-                output += '{:s}: {:s}\n'.format(key, value)
-        print(output)
+def name_to_identifer(name):
+    """name to identifer"""
+    temp = re.sub('[ ]+', '_', name.lower())
+    res = re.sub('[^a-z0-9_]+', '', temp)
+    if res.isidentifier():
+        return res
+    else:
+        raise Exception('name "{:s}" is not a valid identifier'.format(res))
