@@ -25,6 +25,7 @@ __all__ = ["Reference"]
 __docformat__ = "restructuredtext"
 
 import logging
+from ..helpers import trim_dict_name
 
 
 class Reference():
@@ -34,18 +35,37 @@ class Reference():
 
     """
 
-    def __init__(self, ID, data, log_level=logging.WARNING):
+    def __init__(self, ID, data = None, log_level=logging.WARNING):
         self.logger = logging.getLogger(__name__)
         self.log_level = log_level
         self.logger.setLevel(level=self.log_level)
-        self.ID = ID
+        self.ref_ID = ID
+        self.author = ''
+        self.journal = ''
+        self.pages = ''
+        self.title = ''
+        self.volume = ''
+        self.year = ''
+        self.ENTRYTYPE = ''
 
-        for key, value in data.items():
-            self.__dict__[key] = value
+        if data is not None:
+            for k_first, v_first in data.items():
+                setattr(self, k_first, v_first)
+#        for key, value in data.items():
+#            self.__dict__[key] = value
+
+    def validate(self):
+        """validate
+
+        Some documentation here.
+
+        """
+        pass
 
     def dump(self):
-        output = ''
-        for key, value in self.__dict__.items():
-            if isinstance(value, str):
-                output += '{:s}: {:s}\n'.format(key, value)
-        print(output)
+        ref_dict = {}
+        for ref_name, ref_data in self.__dict__.items():
+            trim_name = trim_dict_name(ref_name, '')
+            if not (trim_name == 'log_level' or trim_name == 'logger' or trim_name == 'ref_ID' or trim_name == 'name'):
+                ref_dict[trim_name] = ref_data
+        return ref_dict

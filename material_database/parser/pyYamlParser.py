@@ -30,6 +30,7 @@ from os import path
 import logging
 import bibtexparser
 from bibtexparser.bibdatabase import BibDatabase
+import re
 
 
 class PyYamlParser():
@@ -91,34 +92,44 @@ class PyYamlParser():
         # divide the dict into three dict. BibDict contains the references,
         # metaDict contains the meta dates and dataDict contains the data.
         bib_dict = material_data["meta"]["references"]
-        meta_dict = dict(material_data)
-        data_dict = dict(material_data)
+        meta_dict = dict(material_data["meta"])
+        data_dict = material_data['data']
 
-        del meta_dict["meta"]["references"]
-        del meta_dict["data"]
+        del meta_dict["references"]
 
-        del metaDict["meta"]["references"]
-        del metaDict["data"]
-        yamlMeta = (yaml.dump(metaDict,
+        yaml_meta = "meta:\n"
+        meta_str = (yaml.dump(meta_dict,
                               allow_unicode=True,
                               sort_keys=False)).rstrip(" ")
-
-        bibObj = BibDatabase()
-        bibObj.entries = bibDict
-        bibStr = bibtexparser.dumps(bibObj)
-
-        splitBib = bibStr.split("\n")
-        splitBib[0] = "    "+splitBib[0]
-        yamlBib = ("  references: \n" + "\n     ".join(splitBib)).rstrip("\n ")
-
-        # add four spaces in front of each bibtex line and
-        # insert a reference header with two spaces in front
-        split_Bib = bib_str.split("\n")
-        split_Bib[0] = '    '+split_Bib[0]
-        yaml_bib = ('  references: \n' + '\n     '.join(split_Bib)).rstrip('\n ')
-
+        split_meta = meta_str.split("\n")
+        for str_inx,sub_str in enumerate(split_meta):
+            yaml_meta += '  ' + sub_str + '\n'        
+        yaml_meta = yaml_meta[:-2]
+        
+        bib_list = []
+        for dic_name,dic_data in bib_dict.items():
+            dic_data['ID'] = dic_name
+            bib_list.append(dic_data)
+        bib_Obj = BibDatabase()
+        bib_Obj.entries = bib_list
+        bib_str = bibtexparser.dumps(bib_Obj)        
+        split_bib = bib_str.split("\n")
+        indexes = [i for i,x in enumerate(split_bib) if re.search(r'^@[A-Za-z0-9]+{',x)]
+        
+        yaml_bib = " references: \n"
+        for str_inx,sub_str in enumerate(split_bib):
+            if str_inx in indexes:
+                if str_inx == indexes[0]:
+                    yaml_bib += "   '" + sub_str + '\n'
+                else:
+                    yaml_bib += '    ' + sub_str + '\n'
+            else:
+                yaml_bib += '        ' + sub_str + '\n'
+        yaml_bib = yaml_bib[:-2]
+        yaml_bib += "'\n"
+            
         # add a data header
-        yaml_data = 'data:\n'
+        yaml_data = "data:\n"
 
         '''
         Loop through the parameter names and reference names and add each key
@@ -130,16 +141,16 @@ class PyYamlParser():
         scalar values as flow_style = False
         '''
 
-        for par_name in data_dict['data'].keys():
-            yaml_data += '  ' + par_name+':\n'
-            par = data_dict['data'][par_name]
-            for ref_name in par.keys():
+        for par_name in data_dict.keys():
 
+            yaml_data += '  ' + par_name+':\n'
+            par = data_dict[par_name]
+            for ref_name in par.keys():
                 yaml_data += '    ' + ref_name + ':\n'
                 value = par[ref_name]['value']
 
-                if(type(value) == dict):
-                    tmpYaml = yaml.dump(par[j],
+                if(value == None or value == 'null'):
+                    tmp_yaml = yaml.dump(par[ref_name],
                                         default_flow_style=None,
                                         allow_unicode=True,
                                         sort_keys=False)
@@ -151,13 +162,28 @@ class PyYamlParser():
 
                 # Six spaces are added in front of each value line.
                 split_tmp = tmp_yaml.split('\n')
-                split_tmp[0] = '      ' + split_tmp[0]
-                yaml_par = '\n      '.join(split_tmp)
-                yaml_data += yaml_par
+                for str_inx,sub_str in enumerate(split_tmp):
+                    yaml_data += '      ' + sub_str + '\n'
+                    #split_tmp[0] = '      ' + split_tmp[0]
+                #yaml_par = '\n'.join(split_tmp)
+                #yaml_data += yaml_par
 
             yaml_data = yaml_data.rstrip(' ')
 
         # Concat the meta, references and data yaml string and return it
         yamlFile = yaml_meta + yaml_bib + '\n' + yaml_data
 
+        
+        full_file_name = path.join(path.abspath(self.base_path),
+                                   meta_dict['name'].replace(' ','_') + '.yml')
+        # read yaml file
+        f = open(full_file_name, "w")
+        f.write(yamlFile)
+        f.close()
+        #with open(full_file_name, 'r') as file:
+        #    material_data = yaml.load(file, Loader=yaml.FullLoader)
+            
+            
         return yamlFile
+        
+        
