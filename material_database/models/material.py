@@ -177,7 +177,8 @@ class Material():
         par_list = []
         for par_name in self.__dict__:
             if type(self.__dict__[par_name])==dict:
-                par_list.append(par_name)
+                for sub_dict_name in self.__dict__[par_name]:
+                    par_list.append((par_name,sub_dict_name))
         return par_list
         
 
