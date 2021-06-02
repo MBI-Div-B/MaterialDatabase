@@ -59,8 +59,6 @@ class Material():
         self.description = ''
         self.comment = ''
         self.last_updated = ''
-        self.parameters = {}
-        self.references = {}
         if material_data:
             self.build_from_dict(material_data)
 
@@ -79,21 +77,55 @@ class Material():
         # add references
         for ref_ID, ref_data in material_data['meta']['references'].items():
             ID = name_to_identifer(ref_ID)
-            self.references[ID] = Reference(ID, ref_data)
+            self.__dict__[ID] = Reference(ID, ref_data, log_level=self.log_level)
             self.logger.info('added reference with key {:s}'.format(ID))
 
         for par_name, par_data in material_data['data'].items():
             name = name_to_identifer(par_name)
-            self.__dict__[name] = Parameter(name, par_data, log_level=self.log_level)
+            tmp_par_dict = {}
+            for sub_par_name, sub_par_data in par_data.items():
+                sub_name = name_to_identifer(sub_par_name)
+                tmp_par_dict[sub_name] = Parameter(name,sub_name, sub_par_data, log_level=self.log_level)
+            self.__dict__[name] = tmp_par_dict
             self.logger.info('added parameter with name {:s}'.format(name))
 
-    def dump_to_dict(self):
+    def dump(self):
         """dump_to_dict
 
         Some documentation here.
 
         """
-        pass
+        if self.validate():
+            mat_dict = {}
+            par_list = self.list_parameters()
+            ref_list = self.list_references()
+            par_dict = {}
+            for par in par_list:
+                par_obj = getattr(self, par)
+                tmp_par_dict = {}
+                for par_name, par_data in par_obj.items():
+                    #print(par_data.dump())
+                    tmp_par_dict[par_name] = par_data.dump()
+            #    print(par)
+                par_dict[par] = tmp_par_dict
+            mat_dict['data'] = par_dict
+            
+            meta_dict = {}
+            ref_dict = {}
+            for ref in ref_list:
+                ref_obj = getattr(self, ref)
+                ref_dict[ref] = ref_obj.dump()
+            meta_dict['references'] = ref_dict
+            meta_dict['name'] = self.name
+            meta_dict['last_updated'] = self.last_updated
+            meta_dict['description'] = self.description
+            meta_dict['comment'] = self.comment          
+            mat_dict['meta'] = meta_dict
+            mat_dict['ID'] = self.name
+            
+            
+            return mat_dict
+        return None
 
     def validate(self):
         """validate
@@ -101,23 +133,40 @@ class Material():
         Some documentation here.
 
         """
-        pass
-
-    def add_parameter(self, parameter_dict):
+        par_list = self.list_parameters()
+        ref_list = self.list_references()
+        for par in par_list:
+            par_dict = getattr(self, par)
+            for par_name, par_data in par_dict.items():
+                if not par_data.validate(ref_list):
+                    return False
+        return True
+                    
+    def add_parameter(self, parameter):
         """add_parameter
 
         Some documentation here.
 
         """
-        pass
+        ref_list = self.list_references()
+        
+        if parameter.validate(ref_list):
+            tmp_par_dict = {}
+            tmp_par_dict[parameter.ref_ID] = parameter
+            self.__dict__[parameter.name] = tmp_par_dict
+            print('Added parameter %s with reference %s correctly to database.'%(parameter.name,parameter.ref_ID))
+            self.logger.info('Added parameter %s with reference %s correctly to database.'%(parameter.name,parameter.ref_ID))
 
-    def add_reference(self, reference_dict):
+
+    def add_reference(self, reference):
         """add_reference
 
         Some documentation here.
 
         """
-        pass
+        self.__dict__[reference.ref_ID] = reference
+        print('Added reference %s correctly to database.'%(reference.ref_ID))
+        self.logger.info('Added reference %s correctly to database.'%(reference.ref_ID))
 
     def list_parameters(self):
         """list_parameters
@@ -125,7 +174,13 @@ class Material():
         Some documentation here.
 
         """
-        pass
+        par_list = []
+        for par_name in self.__dict__:
+            if type(self.__dict__[par_name])==dict:
+                for sub_dict_name in self.__dict__[par_name]:
+                    par_list.append((par_name,sub_dict_name))
+        return par_list
+        
 
     def list_references(self):
         """list_references
@@ -133,4 +188,8 @@ class Material():
         Some documentation here.
 
         """
-        pass
+        ref_list = []
+        for ref_name in self.__dict__:
+            if type(self.__dict__[ref_name])==Reference:
+                ref_list.append(ref_name)
+        return ref_list

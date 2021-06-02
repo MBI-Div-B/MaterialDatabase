@@ -25,6 +25,7 @@ __all__ = ["Parameter"]
 __docformat__ = "restructuredtext"
 
 import logging
+from ..helpers import trim_dict_name
 
 
 class Parameter():
@@ -34,28 +35,25 @@ class Parameter():
 
     """
 
-    def __init__(self, name, data, log_level=logging.WARNING):
+    def __init__(self, name,ref_Id, data = None, log_level=logging.WARNING):
         self.logger = logging.getLogger(__name__)
         self.log_level = log_level
         self.logger.setLevel(level=self.log_level)
         self.name = name
-        #self.__ref_ID = ''
-        self.__value = 0
+        self.ref_ID = ref_Id
+        self.__value = None
         self.__uncertainty = 0
         self.__unit = ''
         self.__comment = ''
+        
+        if data is not None:
+        
+            for par_name, par_data in data.items():
+                setattr(self, par_name, par_data)
+                
 
-        i = 0
-        for ref_ID, parameter_dict in data.items():
-            #self.__dict__[ref_ID] = parameter_dict
-            if i == 0:
-                # we populate the data of the first references directly as attributes
-                self.ref_ID = ref_ID
-                print(parameter_dict['value'])
-                # self.value = parameter_dict['value']
-                for k_first, v_first in parameter_dict.items():
-                    setattr(self, k_first, v_first)
-            i += 1
+    def addValueList(self, name, valList):
+        setattr(self, name, valList)
 
     @property
     def value(self):
@@ -106,14 +104,22 @@ class Parameter():
         #self.__dict__[self.ref_ID]['value'] = v
 
 
+    def validate(self, ref_list):
+        """validate
+
+        Some documentation here.
+
+        """
+        if self.ref_ID not in ref_list:
+            print('Reference %s of parameter %s is not in database.'%(self.ref_ID,self.name))
+            self.logger.fatal('Reference %s of parameter %s is not in database.'%(self.ref_ID,self.name))
+            return False
+        return True
+
     def dump(self):
-        output = ''
-        for key, value in self.__dict__.items():
-            if key != 'logger':
-                if isinstance(value, dict):
-                    output += '{:s}:\n'.format(key)
-                    for sub_key, sub_value in value.items():
-                        output += '\t{:s}: {:s}\n'.format(sub_key, str(sub_value))
-                else:
-                    output += '{:s}: {:s}\n'.format(key, str(value))
-        print(output)
+        par_dict = {}
+        for par_name, par_data in self.__dict__.items():
+            trim_name = trim_dict_name(par_name, '_Parameter__')
+            if not (trim_name == 'log_level' or trim_name == 'logger' or trim_name == 'ref_ID' or trim_name == 'name'):
+                par_dict[trim_name] = par_data
+        return par_dict
