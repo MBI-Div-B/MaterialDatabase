@@ -56,7 +56,7 @@ class PyYamlParser():
 
         """
         full_file_name = path.join(path.abspath(self.base_path),
-                                   material + '.yml')
+                                   material + '.yaml')
         # read yaml file
         with open(full_file_name, 'r') as file:
             material_data = yaml.load(file, Loader=yaml.FullLoader)
@@ -175,7 +175,7 @@ class PyYamlParser():
 
         
         full_file_name = path.join(path.abspath(self.base_path),
-                                   meta_dict['name'].replace(' ','_') + '.yml')
+                                   meta_dict['name'].replace(' ','_') + '.yaml')
         # read yaml file
         f = open(full_file_name, "w")
         f.write(yamlFile)
