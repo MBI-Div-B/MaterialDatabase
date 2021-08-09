@@ -47,8 +47,9 @@ data:
 ```
 
 First, there is `meta` section which holds meta-data of the material.
-Most importantly, there must be references defined, in order to link paramters to them.
+Most importantly, there must be `references` defined, in order to link paramters to them.
 The `references` entry must be in plain `bibtex` format, which can hold any type of reference and as many as necessary.
+Further, one must include a `last_updated` field.
 
 In the `data` section the actual physical parameters are declared.
 It is possible to have multiple values stored for a single parameter, by indexing each by a `citation_key`, which must be defined above in the `meta` section.
@@ -75,7 +76,7 @@ An example of programmatic access to the database could look like this:
 ```python
 import material_database as md
 
-parser = md.parser.PyYamlParser(r'C:\Users\borchert\Documents\repos\MaterialDatabase\Data')
+parser = md.parser.PyYamlParser('/my/path/to/yaml/files')
 
 iron = md.Material(parser.load('fe'), log_level=10)
 
