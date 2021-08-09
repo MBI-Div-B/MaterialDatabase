@@ -18,7 +18,7 @@ meta:
     }'
 data:
   thermal_conductivity:
-    curtisss2013unicorn:
+    curtiss2013unicorn:
       value: 80
       uncertainty: 1
       unit: J/m
