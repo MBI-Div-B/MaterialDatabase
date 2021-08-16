@@ -56,10 +56,10 @@ class PyYamlParser():
 
         """
         full_file_name = path.join(path.abspath(self.base_path),
-                                   material + '.yml')
+                                   material + '.yaml')
         # read yaml file
         with open(full_file_name, 'r') as file:
-            material_data = yaml.load(file, Loader=yaml.FullLoader)
+            material_data = yaml.unsafe_load(file)
 
         # add filename as ID to dict
         material_data['ID'] = material
@@ -69,7 +69,29 @@ class PyYamlParser():
         bibtex = material_data['meta']['references']
 
         # convert bibtex into list of dicts
-        bib_list = bibtexparser.loads(bibtex).entries
+        ## these two lines also allow for other types than the standard:
+
+        # 'article',
+        # 'book',
+        # 'booklet',
+        # 'conference',
+        # 'inbook',
+        # 'incollection',
+        # 'inproceedings',
+        # 'manual',
+        # 'mastersthesis',
+        # 'misc',
+        # 'phdthesis',
+        # 'proceedings',
+        # 'techreport',
+        # 'unpublished'
+
+        parser = bibtexparser.bparser.BibTexParser(common_strings=False)
+        parser.ignore_nonstandard_types = False
+        #parser.homogenise_fields = False
+
+        bib_list = bibtexparser.loads(bibtex, parser).entries
+
         # create dicts with bibtex ID as key
         bib_dict = {}
         for bibtex_entry in bib_list:
@@ -80,6 +102,17 @@ class PyYamlParser():
         # replace bibtex string with dict
         material_data['meta']['references'] = bib_dict
 
+        # This part fixes the issue that pyYaml imports complex numbers as strings.
+        # Manually stepping throuh the whole array and turns strings into complex numbers
+        for prop_key, prop_value in material_data['data'].items():
+            for cite_key, cite_value in prop_value.items():
+                if type(cite_value['value']) == str:
+                    self.logger.info(cite_value['value'])
+                    material_data['data'][prop_key][cite_key]['value'] = complex(cite_value['value'].replace("i",  "j").replace(" ",  ""))
+                elif type(cite_value['value']) == list and type(cite_value['value'][0]) == str:
+                    material_data['data'][prop_key][cite_key]['value'] = [complex(v.replace("i",  "j").replace(" ", "")) for v in cite_value['value']]
+                else:
+                    pass
         return material_data
 
     def dump(self, material_data):
@@ -175,7 +208,7 @@ class PyYamlParser():
 
         
         full_file_name = path.join(path.abspath(self.base_path),
-                                   meta_dict['name'].replace(' ','_') + '.yml')
+                                   meta_dict['name'].replace(' ','_') + '.yaml')
         # read yaml file
         f = open(full_file_name, "w")
         f.write(yamlFile)

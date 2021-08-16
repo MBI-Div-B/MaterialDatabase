@@ -1,0 +1,51 @@
+meta:
+  name: nickel
+  formula: Ni
+  last_updated: 7272181873150
+  description:
+  comment:
+  references:
+    '@article{wikipedia,
+      author = "Wikipedia",
+      title = "Nickel",
+      url = "https://de.wikipedia.org/wiki/Nickel"
+      }
+
+     @online{ri_info,
+      author = "refractiveindex.info",
+      title = "Nickel",
+      urls = "https://refractiveindex.info/?shelf=main&book=Ni&page=Johnson"
+      }'
+
+data:
+  thermal_conductivity:
+    wikipedia:
+      value: 91
+      units: W/(mK)
+    ri_info:
+      value: 90
+      units: W/(mK)
+
+  molar_volume:
+    wikipedia:
+      value: 6.59e-06
+      units: m^3/mol
+
+  boiling_point:
+    wikipedia:
+      value: 3003.0
+      units: K
+
+  melting_point:
+    wikipedia:
+      value: 1728.0
+      units: K
+
+  refractive_index:
+    ri_info:
+      value: 1+2j
+      arg_value: 0.188
+      arg_name: Wavelength
+      arg_unit: µm
+      
+

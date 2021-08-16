@@ -4,7 +4,7 @@ meta:
   description: here is some text describing the material
   comment: some comments
   references: 
-   '@article{aad2015combined,
+      '@article{aad2015combined,
          author = {Aad, Georges and Abbott, B and Abdallah, J and Abdinov, O and Aben, R and Abolins, M and AbouZeid, OS and Abramowicz, H and Abreu, H and Abreu, R and others},
          journal = {Physical review letters},
          number = {19},

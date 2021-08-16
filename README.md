@@ -1,8 +1,8 @@
 # MBI Material Database Concept
 
-Due to the general demand for collecting, storing, and exchanging material parameters, we provide a text file based solution as well as several Python scripts and GUIs to read, change, and store material parameters.
+Due to the general demand for collecting, storing, and exchanging material parameters, we provide a text-file-based solution, as well as several Python scripts and GUIs to read, change, and store material parameters.
 
-Initially, we will only support [YAML](https://en.wikipedia.org/wiki/YAML) as data source, but the general design will allow also for other data sources, such as SQL databases or other file formats, e.g. XML or JSON.
+Initially, we will only support the [YAML](https://en.wikipedia.org/wiki/YAML) format as a data source, but the general design will allow also for other data sources, such as SQL databases or other file formats, e.g. XML or JSON.
 
 ## YAML Format
 
@@ -47,12 +47,13 @@ data:
 ```
 
 First, there is `meta` section which holds meta-data of the material.
-Most importantly, the must be references defined, in order to link paramters to them.
-The `references` entrie must be a plain `bibtex` entry which can hold any type of reference and as many as necessary.
+Most importantly, there must be `references` defined, in order to link paramters to them.
+The `references` entry must be in plain `bibtex` format, which can hold any type of reference and as many as necessary.
+Further, one must include a `last_updated` field.
 
 In the `data` section the actual physical parameters are declared.
-It is possible to have multiple values stored for a single parameter, by indexing each by a `citation_key` which must be defined above in the `meta` section.
-The actual parmaters, must have `value` and `unit` as well as optional  `uncertainty` and `comment`.
+It is possible to have multiple values stored for a single parameter, by indexing each by a `citation_key`, which must be defined above in the `meta` section.
+The actual parmaters, must have `value` and `unit` and can optionally have `uncertainty` and `comment`.
 
 In case of a functional dependence of a parameter, the name of the `argument` must be given as new index. The actual parameter `values`, the `arg_values` and `arg_unit` are mandatory.
 The `comment` is optional.
@@ -60,12 +61,11 @@ With this format even multiple functional dependencies are possible from one and
 
 ## Python Scripts
 
-Although the YAML file format allows for human readability and does not require any programmatic access, we provide several Python modules in order to inteact with the material database.
+The YAML file format allows for human readability and does not require any programmatic access.
+However, we provide several Python (other languages such as MATLAB can be implemented in the future as well) modules in order to inteact with the material database:
 
-We first stick to Python but other languages such as MATLAB can be implemented in the future as well.
-
-We divide the modules into a `Parser` module which is dedicated for reading and writing data from and to e.g. a YAML file.
-The data must be provided as a `dict` in Python with a well defined structure.
+The `Parser` module is dedicated for reading and writing data from and to e.g. a YAML file.
+New data must be provided as a `dict` in Python with a well-defined structure.
 
 The `Material` module implements a class for `Material`, `Paramter`, and `References` and should allow for easy interaction in a Python script with the material database.
 
@@ -76,11 +76,11 @@ An example of programmatic access to the database could look like this:
 ```python
 import material_database as md
 
-parser = md.PyYamlParser('/my/path/to/yaml/files')
+parser = md.parser.PyYamlParser('/my/path/to/yaml/files')
 
-iron = md.Material(parser.read_from_file(iron.yaml))
+iron = md.Material(parser.load('fe'), log_level=10)
 
-print(iron.thermal_conductivity)
-.. 80
+print(iron.thermal_conductivity['curtisss2013unicorn'].value)
+..80
 
 ```

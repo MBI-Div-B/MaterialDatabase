@@ -17,3 +17,7 @@ _templates
 
 # ipython checkpoints
 docs/source/**/.ipynb_checkpoints
+docs/**/.ipynb_checkpoints
+docs/**/.ipynb_checkpoints
+docs/.ipynb_checkpoints
+docs/examples/.ipynb_checkpoints

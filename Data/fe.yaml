@@ -5,7 +5,7 @@ meta:
   comment: maybe there is something to say here
   last_updated: 2020-04-28
   references:
-    @article{curtiss2013unicorn,
+    '@article{curtiss2013unicorn,
     author = "Curtiss, Michael and Becker, Iain and Bosman, Tudor and Doroshenko, Sergey and Grijincu, Lucian and Jackson, Tom and Kunnatur, Sandhya and Lassen, Soren and Pronin, Philip and Sankar, Sriram and others",
     title = "Unicorn: A system for searching the social graph",
     journal = "Proceedings of the VLDB Endowment",
@@ -15,7 +15,7 @@ meta:
     year = "2013",
     publisher = "VLDB Endowment",
     doi = "10.14778/2536222.2536239"
-    }
+    }'
 data:
   thermal_conductivity:
     curtiss2013unicorn:
@@ -25,11 +25,9 @@ data:
       comment: some value comment here
   refractive_index:
     curtiss2013unicorn:
-      value:
-        wavelength:
-          values: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, ...]
-          arg_values: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, ...]
-          arg_unit: nm
-          comment: maybe one can write a fit of the data here
+      value: [1+2j, 2+4j]
+      arg_value: [800]
+      arg_unit: nm
+      comment: maybe one can write a fit of the data here
       unit: ''
       comment: n = n' + i k

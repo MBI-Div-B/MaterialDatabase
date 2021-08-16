@@ -85,7 +85,7 @@ class Material():
             tmp_par_dict = {}
             for sub_par_name, sub_par_data in par_data.items():
                 sub_name = name_to_identifer(sub_par_name)
-                tmp_par_dict[sub_name] = Parameter(name,sub_name, sub_par_data, log_level=self.log_level)
+                tmp_par_dict[sub_name] = Parameter(name, sub_name, sub_par_data, log_level=self.log_level)
             self.__dict__[name] = tmp_par_dict
             self.logger.info('added parameter with name {:s}'.format(name))
 
